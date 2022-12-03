@@ -11,4 +11,10 @@ url_italy <- str_c('https://api.spotify.com/v1/playlists/', playlist_italy, '/tr
 songs_usa <- GET(url = url_usa,
                 config = add_headers(authorization = token))
 songs_usa <- httr::content(songs_usa)
-songs_usa$items[[1]]$track$artists[[1]]$name
+songs_usa$items[[1]]
+song_id_usa <- vector(length = 50)
+for (i in 1:50) {
+  song_id_usa[[i]] = songs_usa$items[[i]]$track$id
+}
+
+
