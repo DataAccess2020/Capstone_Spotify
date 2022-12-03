@@ -1,12 +1,24 @@
-# Extracting song info ----
+# Creating a table with artist name and song title ----
 track_url <- 'https://api.spotify.com/v1/audio-features/'
 vec_id_usa <- vector(length = 50)
 for (i in 1:50) {
   vec_id_usa[i] <- str_c(track_url, song_id_usa[i])
 }
-names <- data.frame(artist = character(),
-                    title = character ())
-names <- as.data.frame(names, ncol = 2)
+names <- data.frame(id = character(),
+                    artist = character(),
+                    title = character())
 for (i in 1:50) {
-  names[nrow(names) + 1, ] = c(songs_usa$items[[i]]$track$artists[[1]]$name, songs_usa$items[[i]]$track$name)
+  names[nrow(names) + 1, ] = c(song_id_usa[i], songs_usa$items[[i]]$track$artists[[1]]$name, songs_usa$items[[i]]$track$name)
+}
+
+# Creating a table with songs features
+features_usa <- vector(length = 50)
+for (i in 1:50) {
+  
+}
+for (i in 1:50) {
+song1us <- GET(url = vec_id_usa[i],
+               config = add_headers(authorization = token))
+song1us <- httr::content(song1us)
+song1us <- as.data.frame(song1us)
 }
