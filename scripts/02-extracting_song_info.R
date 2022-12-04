@@ -67,3 +67,16 @@ for (i in 1:50) {
 songs_f_italy <- do.call('rbind', features_italy)
 songs_f_italy <- songs_f_italy[, -c(12:16)]
 italy <- cbind(names_italy, songs_f_italy)
+
+# Changing tables' values from lists to vectors ----
+for (i in 4:16) {
+  usa[, i] <- unlist(usa[, i], use.names = F)
+}
+
+for (i in 4:16) {
+  japan[, i] <- unlist(japan[, i], use.names = F)
+}
+
+for (i in 4:16) {
+  italy[, i] <- unlist(italy[, i], use.names = F)
+}
