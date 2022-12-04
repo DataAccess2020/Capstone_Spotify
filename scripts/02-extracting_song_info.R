@@ -11,14 +11,13 @@ for (i in 1:50) {
   names[nrow(names) + 1, ] = c(song_id_usa[i], songs_usa$items[[i]]$track$artists[[1]]$name, songs_usa$items[[i]]$track$name)
 }
 
-# Creating a table with songs features
-features_usa <- vector(length = 50)
+# Creating a table with songs features ----
+features_usa <- vector(mode = 'list', length = 50)
 for (i in 1:50) {
-  
+features_usa[[i]] = GET(url = vec_id_usa[i],
+                        config = add_headers(authorization = token))
+features_usa[[i]] = httr::content(features_usa[[i]])
 }
-for (i in 1:50) {
-song1us <- GET(url = vec_id_usa[i],
-               config = add_headers(authorization = token))
-song1us <- httr::content(song1us)
-song1us <- as.data.frame(song1us)
-}
+songs_f_usa <- do.call('rbind', features_usa)
+songs_f_usa <- songs_f_usa[, -c(12:16)]
+usa <- cbind(names, songs_f_usa)
