@@ -80,3 +80,13 @@ for (i in 4:16) {
 for (i in 4:16) {
   italy[, i] <- unlist(italy[, i], use.names = F)
 }
+
+# Adding a song position on the chart ----
+usa <- add_column(usa, position = 1:50, .after = 1)
+italy <- add_column(italy, position = 1:50, .after = 1)
+japan <- add_column(japan, position = 1:50, .after = 1)
+
+# Saving the data frames into CSV files
+rio::export(usa, 'songs/usa.csv', format = 'csv')
+rio::export(italy, 'songs/italy.csv', format = 'csv')
+rio::export(japan, 'songs/japan.csv', format = 'csv')
