@@ -31,6 +31,7 @@ cor_usa <- cor(usa[, c(5, 6, 8, 10:15)])
 cor_it <- cor(italy[, c(5, 6, 8, 10:15)])
 cor_jpn <- cor(japan[, c(5, 6, 8, 10:15)])
 
+summary(aov(danceability ~ country, data))
 # Creating the variables with danceability and instrumentalness data
 us_dance <- usa$danceability
 it_dance <- italy$danceability
