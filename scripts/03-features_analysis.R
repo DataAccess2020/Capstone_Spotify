@@ -22,6 +22,15 @@ all_means$position <- NULL  # we do not need the mean for the position
 all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to seconds
 names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renaming the column
 
+# Leaving only relevant columns
+all_means_main <- all_means %>% select(country, danceability, energy, loudness, speechiness, acousticness,
+                                       instrumentalness, liveness, valence, tempo)
+all_means_pos_main <- all_means_pos %>% select(position, danceability, energy, loudness, speechiness, acousticness,
+                                        instrumentalness, liveness, valence, tempo)
+cor_usa <- cor(usa[, c(5, 6, 8, 10:15)])
+cor_it <- cor(italy[, c(5, 6, 8, 10:15)])
+cor_jpn <- cor(japan[, c(5, 6, 8, 10:15)])
+
 # Creating the variables with danceability and instrumentalness data
 us_dance <- usa$danceability
 it_dance <- italy$danceability
