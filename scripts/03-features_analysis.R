@@ -16,6 +16,12 @@ jpn_mod <- add_column(jpn_mod, country = 'JPN', .after = 1)
 # Creating the table with all the data
 data <- rbind(usa_mod, it_mod, jpn_mod)
 
+# Counting means for the features
+all_means <- data %>% group_by(country) %>% summarise_if(is.numeric, mean)
+all_means$position <- NULL  # we do not need the mean for the position
+all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to seconds
+names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renaming the column
+
 # Creating the variables with danceability and instrumentalness data
 us_dance <- usa$danceability
 it_dance <- italy$danceability
