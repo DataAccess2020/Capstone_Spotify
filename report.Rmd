@@ -120,4 +120,18 @@ I have done the same with the Italian and Japanese playlists.
 ## Features analysis
 
 Since it is my first research project that involves statistics, I searched for similar analyses to use one as a guideline. I found a research called *"What makes a song trend? Cluster analysis of musical attributes for Spotify top trending songs"* [] in which Top 100 US Trending Songs of 2017 and 2018 were analyzed.
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+First, I was interested in the descriptive analysis of the means of features for each country. I grouped the songs by countries and counted the means for their features:
+
+```{r means, warning=F, message=F, echo=F}
+data <- rio::import('songs/data.csv')
+all_means <- data %>% group_by(country) %>% summarise_if(is.numeric, mean)
+all_means$position <- NULL  # we do not need the mean for the position
+all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to seconds
+names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renaming the column
+```
+
+```{r datatable, echo=F}
+head(all_means[1:6]) %>% kable()
+```
+
