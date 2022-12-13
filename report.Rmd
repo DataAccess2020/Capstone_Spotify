@@ -1,0 +1,123 @@
+---
+title: 'Top Songs Analysis: US, Italy, Japan'
+author: "Sergei Korotkikh"
+date: "2022-12-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Summary
+
+This project is devoted to analyzing the features of Top-50 songs of year 2022 in the United States, Italy and Japan.
+
+
+## Introduction
+
+The idea for my project was to perform an analysis of the features of top songs of 2022 in different countries. I was interested to see if there are any features that make a song popular, and if such features are the same around the world. I have chosen the three following countries: United States of America, Italy and Japan. When choosing the countries for the analysis, I took into consideration the significance of music market in the country, the region in which the country is located, and the number of "authentic" songs on the playlist of top songs on Spotify. USA and Japan were the two biggest music markets in the world in 2021 [], so I decided to choose them. Other countries (Germany, South Korea, China) either have many American songs or are located in the same region (North America or Asia). So, for my third country I have chosen Italy.
+
+## Data Preparation
+
+For my analysis, I needed to have the data frame for each country's top songs, as well as the features of the songs. To get the data frames, I have used the Spotify API. First, I logged in with the credentials into the system. Then, in the Spotify app, I got the IDs of the playlists (*Top Tracks of 2022 USA*, *Top Songs Italia 2022*, *Top Tracks of 2022 Japan*) and made the request using the API to get the information about the songs in the playlists. Here I encountered the difficulty: the API returned a large list with much unnecessary information about each song. To get the features of each song, I needed only the track ID. Then, using another link of API, I created the data frame with the song features. It was weird for me to see that the values in the table were saved as lists, not as vectors. Luckily, the *unlist* function helped me.
+
+Here is an example of getting the features for top USA songs:
+
+```{r creds, echo=F, warning=F, message=F}
+library(tidyverse)
+library(httr)
+library(stringr)
+
+spotify_cred <- readr::read_csv(file = "spotify-credentials.csv")
+clientID <- spotify_cred$clientID
+secret <-  spotify_cred$secret
+r <-  POST(
+  url = 'https://accounts.spotify.com/api/token',
+  accept_json(),
+  body = list(grant_type = 'client_credentials',
+              client_id = clientID,
+              client_secret = secret, 
+              content_type = "application/x-www-form-urlencoded"),   
+  encode = 'form',
+  verbose()
+)
+cnt <- httr::content(r)
+token <- str_c(cnt$token_type, cnt$access_token, sep =' ')
+
+playlist_usa <- 'https://open.spotify.com/playlist/37i9dQZF1DXbJMiQ53rTyJ' %>%
+  str_remove(., 'https://open.spotify.com/playlist/')
+
+url_usa <- str_c('https://api.spotify.com/v1/playlists/', playlist_usa, '/tracks')
+track_url <- 'https://api.spotify.com/v1/audio-features/'
+```
+
+```{r usa example1, warning=F, message=F}
+# Loading packages
+library(tidyverse)
+library(httr)
+library(stringr)
+
+# Creating a table with USA song IDs ----
+
+songs_usa <- GET(url = url_usa,  # the link to the playlist
+                config = add_headers(authorization = token))
+
+songs_usa <- httr::content(songs_usa)  # extracting the 'large list' to know the way to ID
+
+song_id_usa <- vector(length = 50)  # creating a vector containing songs' IDs
+
+for (i in 1:50) {
+  song_id_usa[[i]] = songs_usa$items[[i]]$track$id  # loading the IDs into vector
+}
+
+# Creating a table with artist name and song title USA ----
+
+vec_id_usa <- vector(length = 50)  # creating a vector for URL for each song
+
+for (i in 1:50) {
+  vec_id_usa[i] <- str_c(track_url, song_id_usa[i])  # creating the URL for each song for API to use
+}
+
+names_usa <- data.frame(id = character(),
+                    artist = character(),
+                    title = character())  # creating a table with song ID, artist and title
+
+for (i in 1:50) {
+  names_usa[nrow(names_usa) + 1, ] = c(song_id_usa[i], songs_usa$items[[i]]$track$artists[[1]]$name, songs_usa$items[[i]]$track$name)  # adding the values to the table
+}
+
+# Creating a table with songs features USA ----
+
+features_usa <- vector(mode = 'list', length = 50)
+
+for (i in 1:50) {
+features_usa[[i]] = GET(url = vec_id_usa[i],
+                        config = add_headers(authorization = token))
+features_usa[[i]] = httr::content(features_usa[[i]])  # extracting the songs' features into vector
+}
+
+songs_f_usa <- do.call('rbind', features_usa)  # creating a table with songs' features
+songs_f_usa <- songs_f_usa[, -c(12:16)]  # deleting the unnecessary features
+usa <- cbind(names_usa, songs_f_usa)  # creating the table with ID, artist, title and features
+
+# Changing tables' values from lists to vectors ----
+for (i in 4:16) {
+  usa[, i] <- unlist(usa[, i], use.names = F)
+}
+
+# Adding a song position on the chart ----
+usa <- add_column(usa, position = 1:50, .after = 1)
+```
+
+``` {r usatable, echo=F, warning=F, message=F}
+library(knitr)
+head(usa[1:7]) %>% kable()
+```
+
+I have done the same with the Italian and Japanese playlists.
+
+## Features analysis
+
+Since it is my first research project that involves statistics, I searched for similar analyses to use one as a guideline. I found a research called *"What makes a song trend? Cluster analysis of musical attributes for Spotify top trending songs"* [] in which Top 100 US Trending Songs of 2017 and 2018 were analyzed.
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
