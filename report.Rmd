@@ -29,7 +29,7 @@ library(tidyverse)
 library(httr)
 library(stringr)
 
-spotify_cred <- readr::read_csv(file = "spotify-credentials.csv")
+spotify_cred <- readr::read_csv(file = "credentials/spotify-credentials.csv")
 clientID <- spotify_cred$clientID
 secret <-  spotify_cred$secret
 r <-  POST(
@@ -112,7 +112,7 @@ usa <- add_column(usa, position = 1:50, .after = 1)
 
 ``` {r usatable, echo=F, warning=F, message=F}
 library(knitr)
-head(usa[1:7]) %>% kable()
+head(usa[2:7]) %>% kable()
 ```
 
 I have done the same with the Italian and Japanese playlists.
@@ -135,3 +135,14 @@ names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renami
 head(all_means[1:6]) %>% kable()
 ```
 
+Having analyzed the means of the features, I have been able to make the following conclusions. The most popular songs of 2022 in all three countries score high on danceability (>0.6 on the scale from 0 to 1), energy (>0.63) and loudness (>-7 on the scale from -60 to 0 []). At the same time, the songs have low scores in speechiness (<0.12), acousticness (<0.23), instrumentalness (<0.02) and liveness (<0.22). It means that people from the USA, Japan and Italy like energetic songs that are easy to dance to. Also, the songs are not instrumental, they are recorded in the studio, and almost all the words in the songs are sung (not spoken).
+
+I have also paid attention to the differences in the means in particular features between the countries. For example, the *danceability* feature means are almost equal in the US and Italy (0.67790, 0.67388), but is different in Japan (0.60980). t-test (0.05) also proves it:
+
+```{r tdance, echo=F}
+filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
+```
+
+It means that Japanese people prefer songs that are slightly less danceable than Italians and Americans.
+
+On the other hand, American people enjoy less energetic songs (0.63474) compared to people from Italy and Japan (0.73332, 0.74724). 
