@@ -32,14 +32,21 @@ all_means_pos_main <- all_means_pos %>% select(position, danceability, energy, l
 # cor_usa <- cor(usa[, c(5, 6, 8, 10:15)])
 # cor_it <- cor(italy[, c(5, 6, 8, 10:15)])
 # cor_jpn <- cor(japan[, c(5, 6, 8, 10:15)])
-# 
-summary(aov(energy ~ country, data))
 
 # t-test on danceability IT-JPN
 filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
 
 # boxplot on energy
 data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + coord_flip() + theme_bw()
+
+# ANOVA on the remaining variables
+summary(aov(loudness ~ country, data))  # significant
+summary(aov(speechiness ~ country, data))  # significant
+summary(aov(instrumentalness ~ country, data))  # insignificant
+summary(aov(liveness ~ country, data))  # insignificant
+summary(aov(valence ~ country, data))  # significant
+summary(aov(tempo ~ country, data))  # insignificant
+summary(aov(duration_ms ~ country, data))  # significant
 
 # Creating the variables with danceability and instrumentalness data
 us_dance <- usa$danceability
@@ -53,3 +60,4 @@ jpn_inst <- japan$instrumentalness
 model <- lm(energy ~ loudness, usa)
 summary(model)
 ggplot(usa, aes(loudness, energy)) + geom_point() + geom_smooth(method = 'lm')
+filter(data, country %in% c('JPN', 'US')) %>% t.test(loudness ~ country, .)
