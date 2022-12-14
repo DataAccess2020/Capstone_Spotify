@@ -15,9 +15,11 @@ jpn_mod <- add_column(jpn_mod, country = 'JPN', .after = 1)
 
 # Creating the table with all the data
 data <- rbind(usa_mod, it_mod, jpn_mod)
-
+rio::export(data, 'songs/data.csv', 'csv')
+data <- rio::import('songs/data.csv')
 # Counting means for the features
 all_means <- data %>% group_by(country) %>% summarise_if(is.numeric, mean)
+all_means_pos <- data %>% group_by(position) %>% summarise_if(is.numeric, mean)
 all_means$position <- NULL  # we do not need the mean for the position
 all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to seconds
 names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renaming the column
@@ -27,11 +29,18 @@ all_means_main <- all_means %>% select(country, danceability, energy, loudness, 
                                        instrumentalness, liveness, valence, tempo)
 all_means_pos_main <- all_means_pos %>% select(position, danceability, energy, loudness, speechiness, acousticness,
                                         instrumentalness, liveness, valence, tempo)
-cor_usa <- cor(usa[, c(5, 6, 8, 10:15)])
-cor_it <- cor(italy[, c(5, 6, 8, 10:15)])
-cor_jpn <- cor(japan[, c(5, 6, 8, 10:15)])
+# cor_usa <- cor(usa[, c(5, 6, 8, 10:15)])
+# cor_it <- cor(italy[, c(5, 6, 8, 10:15)])
+# cor_jpn <- cor(japan[, c(5, 6, 8, 10:15)])
+# 
+summary(aov(energy ~ country, data))
 
-summary(aov(danceability ~ country, data))
+# t-test on danceability IT-JPN
+filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
+
+# boxplot on energy
+data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + 
+
 # Creating the variables with danceability and instrumentalness data
 us_dance <- usa$danceability
 it_dance <- italy$danceability
