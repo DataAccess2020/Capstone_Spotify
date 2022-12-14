@@ -39,7 +39,7 @@ summary(aov(energy ~ country, data))
 filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
 
 # boxplot on energy
-data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + 
+data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + coord_flip() + theme_bw()
 
 # Creating the variables with danceability and instrumentalness data
 us_dance <- usa$danceability
