@@ -145,4 +145,9 @@ filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
 
 It means that Japanese people prefer songs that are slightly less danceable than Italians and Americans.
 
-On the other hand, American people enjoy less energetic songs (0.63474) compared to people from Italy and Japan (0.73332, 0.74724). 
+On the other hand, American people enjoy less energetic songs (0.63474) compared to people from Italy and Japan (0.73332, 0.74724):
+
+```{r energybox, echo=F}
+data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + coord_flip() + theme_bw()
+```
+
