@@ -151,3 +151,10 @@ On the other hand, American people enjoy less energetic songs (0.63474) compared
 data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + coord_flip() + theme_bw()
 ```
 
+ANOVA analysis has also been performed on other variables to see if there are any statistically significant differences between the means of the three countries. The tests on loudness, speechiness, valence and duration of the songs returned the statistically significant p-values. For example, this is the ANOVA test that pays attention to the songs' valence — it shows how positive/cheerful the songs sounds (0 being most sad, 1 being most happy):
+
+```{r valenceaov, echo=F}
+summary(aov(valence ~ country, data))
+```
+
+Although some tests returned statictically significant values, not all of them are practically significant. For instance, for ANOVA on speechiness p-level is less than 0.01. However, the speechiness values for Italy, Japan and the USA do not vary much: 0.09, 0.07 and 0.11 (on the scale from 0 to 1). Practical significance, as well as statistical one, has been found in valence and duration variables. Japanese people prefer happier songs (0.604) than Italians and Americans (0.509, 0.492). In addition, top songs in Japan are longer (~ 4 minutes) compared to the Italian and American ones (~ 3 and 3.5 minutes).
