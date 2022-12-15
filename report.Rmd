@@ -1,26 +1,37 @@
 ---
 title: 'Top Songs Analysis: US, Italy, Japan'
 author: "Sergei Korotkikh"
-date: "2022-12-13"
-output: html_document
+date: '2022-12-13'
+output:
+  html_document:
+    toc: yes
+    highlight: pygments
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Summary
+## 1. Introduction
 
-This project is devoted to analyzing the features of Top-50 songs of year 2022 in the United States, Italy and Japan.
+This project is devoted to analyzing the features of Top-50 songs of year 2022 in the United States, Italy and Japan. Using the Spotify API, I obtained the data for the features for each song. I was interested to see if there are any features that make a song popular, and if such features are the same around the world.
 
 
-## Introduction
+## 2. Hypotheses
 
-The idea for my project was to perform an analysis of the features of top songs of 2022 in different countries. I was interested to see if there are any features that make a song popular, and if such features are the same around the world. I have chosen the three following countries: United States of America, Italy and Japan. When choosing the countries for the analysis, I took into consideration the significance of music market in the country, the region in which the country is located, and the number of "authentic" songs on the playlist of top songs on Spotify. USA and Japan were the two biggest music markets in the world in 2021 [], so I decided to choose them. Other countries (Germany, South Korea, China) either have many American songs or are located in the same region (North America or Asia). So, for my third country I have chosen Italy.
+1. The most popular songs are high in **danceability** and **energy**.
+2. The most popular songs' features **are not different** in the three countries analyzed.
 
-## Data Preparation
 
-For my analysis, I needed to have the data frame for each country's top songs, as well as the features of the songs. To get the data frames, I have used the Spotify API. First, I logged in with the credentials into the system. Then, in the Spotify app, I got the IDs of the playlists (*Top Tracks of 2022 USA*, *Top Songs Italia 2022*, *Top Tracks of 2022 Japan*) and made the request using the API to get the information about the songs in the playlists. Here I encountered the difficulty: the API returned a large list with much unnecessary information about each song. To get the features of each song, I needed only the track ID. Then, using another link of API, I created the data frame with the song features. It was weird for me to see that the values in the table were saved as lists, not as vectors. Luckily, the *unlist* function helped me.
+## 3. Data
+
+### 3.1. Choosing the data
+
+When choosing the countries for the analysis, I took into consideration the significance of music market in the country, the region in which the country is located, and the number of "authentic" songs on the playlist of top songs on Spotify. USA and Japan were the two biggest music markets in the world in 2021 [], so I decided to choose them. Other countries (Germany, South Korea, China) either have many American songs or are located in the same region (North America or Asia). So, for my third country I have chosen Italy.
+
+### 3.2. Preparing the data
+
+For my analysis, I needed to have the data frame for each country's top songs, as well as the features of the songs. First, I logged in with the credentials into the system. Then, in the Spotify app, I got the IDs of the playlists (*Top Tracks of 2022 USA*, *Top Songs Italia 2022*, *Top Tracks of 2022 Japan*) and made the request using the API to get the information about the songs in the playlists. Here I encountered the difficulty: the API returned a large list with much unnecessary information about each song. To get the features of each song, I needed only the track ID. Then, using another link of API, I created the data frame with the song features. It was weird for me to see that the values in the table were saved as lists, not as vectors. Luckily, the `unlist` function helped me.
 
 Here is an example of getting the features for top USA songs:
 
@@ -135,9 +146,9 @@ names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renami
 head(all_means[1:6]) %>% kable()
 ```
 
-Having analyzed the means of the features, I have been able to make the following conclusions. The most popular songs of 2022 in all three countries score high on danceability (>0.6 on the scale from 0 to 1), energy (>0.63) and loudness (>-7 on the scale from -60 to 0 []). At the same time, the songs have low scores in speechiness (<0.12), acousticness (<0.23), instrumentalness (<0.02) and liveness (<0.22). It means that people from the USA, Japan and Italy like energetic songs that are easy to dance to. Also, the songs are not instrumental, they are recorded in the studio, and almost all the words in the songs are sung (not spoken).
+Having analyzed the means of the features, I have been able to make the following conclusions. The most popular songs of 2022 in all three countries score high on `danceability` (>0.6 on the scale from 0 to 1), `energy` (>0.63) and `loudness` (>-7 on the scale from -60 to 0 []). At the same time, the songs have low scores in `speechiness` (<0.12), `acousticness` (<0.23), `instrumentalness` (<0.02) and `liveness` (<0.22). It means that people from the USA, Japan and Italy like energetic songs that are easy to dance to. Also, the songs are not instrumental, they are recorded in the studio, and almost all the words in the songs are sung (not spoken).
 
-I have also paid attention to the differences in the means in particular features between the countries. For example, the *danceability* feature means are almost equal in the US and Italy (0.67790, 0.67388), but is different in Japan (0.60980). t-test (0.05) also proves it:
+I have also paid attention to the differences in the means in particular features between the countries. For example, the `danceability` feature means are almost equal in the US and Italy (0.67790, 0.67388), but is different in Japan (0.60980). t-test (0.05) also proves it:
 
 ```{r tdance, echo=F}
 filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
@@ -151,10 +162,10 @@ On the other hand, American people enjoy less energetic songs (0.63474) compared
 data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + coord_flip() + theme_bw()
 ```
 
-ANOVA analysis has also been performed on other variables to see if there are any statistically significant differences between the means of the three countries. The tests on loudness, speechiness, valence and duration of the songs returned the statistically significant p-values. For example, this is the ANOVA test that pays attention to the songs' valence — it shows how positive/cheerful the songs sounds (0 being most sad, 1 being most happy):
+ANOVA analysis has also been performed on other variables to see if there are any statistically significant differences between the means of the three countries. The tests on `loudness`, `speechiness`, `valence` and `duration` of the songs returned the statistically significant p-values. For example, this is the ANOVA test that pays attention to the songs' `valence` — it shows how positive/cheerful the songs sounds (0 being most sad, 1 being most happy):
 
 ```{r valenceaov, echo=F}
 summary(aov(valence ~ country, data))
 ```
 
-Although some tests returned statictically significant values, not all of them are practically significant. For instance, for ANOVA on speechiness p-level is less than 0.01. However, the speechiness values for Italy, Japan and the USA do not vary much: 0.09, 0.07 and 0.11 (on the scale from 0 to 1). Practical significance, as well as statistical one, has been found in valence and duration variables. Japanese people prefer happier songs (0.604) than Italians and Americans (0.509, 0.492). In addition, top songs in Japan are longer (~ 4 minutes) compared to the Italian and American ones (~ 3 and 3.5 minutes).
+Although some tests returned statictically significant values, not all of them are practically significant. For instance, for ANOVA on `speechiness` p-level is less than 0.01. However, the `speechiness` values for Italy, Japan and the USA do not vary much: 0.09, 0.07 and 0.11 (on the scale from 0 to 1). Practical significance, as well as statistical one, has been found in `valence` and `duration` variables. Japanese people prefer happier songs (0.604) than Italians and Americans (0.509, 0.492). In addition, top songs in Japan are longer (~ 4 minutes) compared to the Italian and American ones (~ 3 and 3.5 minutes).
