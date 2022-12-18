@@ -17,13 +17,13 @@ knitr::opts_chunk$set(echo = TRUE)
 This project is devoted to analyzing the features of Top-50 songs of year 2022 in the United States, Italy and Japan. Using the Spotify API, I obtained the data for the features for each song. I was interested to see if there are any features that make a song popular, and if such features are the same around the world.
 
 ## 2. Literature
-Since it is my first research project that involves statistics, I searched for similar analyses to use one as a guideline. I found a research paper called *"What makes a song trend? Cluster analysis of musical attributes for Spotify top trending songs"* in which Top 100 US Trending Songs of 2017 and 2018 were analyzed. According to this article, the most trendy songs in the US score high in danceability and energy. In addition, their means for liveness and instrumentalness are low [].
+Since it is my first research project that involves statistics, I searched for similar analyses to use one as a guideline. I found a research paper called *"What makes a song trend? Cluster analysis of musical attributes for Spotify top trending songs"* in which Top 100 US Trending Songs of 2017 and 2018 were analyzed. According to this article, the most trendy songs in the US scored high in danceability and energy. In addition, their means for liveness and instrumentalness were low [].
 
 When choosing the countries for the analysis, I took into consideration the significance of music market in the country, the region in which the country is located, and the number of "authentic" songs on the playlist of top songs on Spotify. USA and Japan were the two biggest music markets in the world in 2021 [], so I decided to choose them. Other countries (Germany, South Korea, China) either have many American songs or are located in the same region (North America or Asia). So, for my third country I have chosen Italy.
 
 ## 3. Hypotheses
 
-Since most people love 'happy' songs that they can easily dance to, I suppose the top songs should score high in energy and danceability and valence (the variable which shows how 'happy' the song is). Furthermore, I think that these features should not be different in the USA, Japan and Italy. In other words, there should not be any statistically significant difference between any features.
+Since most people love 'happy' songs that they can easily dance to, I suppose that this year again the top songs should score high in danceability, energy and valence (the variable which shows how 'happy' the song is) []. Furthermore, I think that these features should not be different in the USA, Japan and Italy. In other words, there should not be any statistically significant difference between any features.
 
 Thus, my hypotheses are:
 
@@ -43,9 +43,11 @@ The tasks for my project are the following:
 4. Perform tests (ANOVA, t-test) on the variables;
 5. Visualize the data.
 
-For my analysis, I needed to have the data frame for each country's top songs, as well as the features of the songs. First, I logged in with the credentials into the system. Then, in the Spotify app, I got the IDs of the playlists (*Top Tracks of 2022 USA*, *Top Songs Italia 2022*, *Top Tracks of 2022 Japan*) and made the request using the API to get the information about the songs in the playlists. Here I encountered the difficulty: the API returned a large list with much unnecessary information about each song. To get the features for each song, I needed only the track ID. Then, using another link of API, I created the data frame with the song features. It was weird for me to see that the values in the table were saved as lists, not as vectors. Luckily, the `unlist` function helped me.
+For my analysis, I needed to have the data frame for each country's top songs, as well as the features of the songs. First, I logged in with the credentials into the system. Then, in the Spotify app, I got the IDs of the three playlists (*Top Tracks of 2022 USA*, *Top Songs Italia 2022*, *Top Tracks of 2022 Japan*) and made the request using the API to get the information about the songs in the playlists. There are 50 songs in each playlist, which makes it total of 150 songs.
 
-Here is an example of getting the features for top USA songs:
+Here I encountered the difficulty: the API returned a large list with much unnecessary information about each song. To get the features for each song, I needed only the track ID. Then, using another API link, I created the data frame with the songs' features. It was weird for me to see that the values in the table were saved as lists, not as vectors. Luckily, the `unlist` function helped me.
+
+Here is an example of getting the features for top 50 USA songs:
 
 ```{r creds, echo=F, warning=F, message=F}
 library(tidyverse)
@@ -86,17 +88,17 @@ library(stringr)
 songs_usa <- GET(url = url_usa,  # the link to the playlist
                 config = add_headers(authorization = token))
 
-songs_usa <- httr::content(songs_usa)  # extracting the 'large list' to know the way to ID
+songs_usa <- httr::content(songs_usa)  # extracting the 'large list' to know the way to song ID
 
-song_id_usa <- vector(length = 50)  # creating a vector containing songs' IDs
+song_id_usa <- vector(length = 50)  # creating a vector which will contain songs' IDs
 
 for (i in 1:50) {
-  song_id_usa[[i]] = songs_usa$items[[i]]$track$id  # loading the IDs into vector
+  song_id_usa[[i]] = songs_usa$items[[i]]$track$id  # loading the IDs into the vector
 }
 
 # Creating a table with artist name and song title USA ----
 
-vec_id_usa <- vector(length = 50)  # creating a vector for URL for each song
+vec_id_usa <- vector(length = 50)  # creating a vector for the URL for each song
 
 for (i in 1:50) {
   vec_id_usa[i] <- str_c(track_url, song_id_usa[i])  # creating the URL for each song for API to use
@@ -104,7 +106,7 @@ for (i in 1:50) {
 
 names_usa <- data.frame(id = character(),
                     artist = character(),
-                    title = character())  # creating a table with song ID, artist and title
+                    title = character())  # creating a table which will contain song ID, artist and title
 
 for (i in 1:50) {
   names_usa[nrow(names_usa) + 1, ] = c(song_id_usa[i], songs_usa$items[[i]]$track$artists[[1]]$name, songs_usa$items[[i]]$track$name)  # adding the values to the table
@@ -112,12 +114,12 @@ for (i in 1:50) {
 
 # Creating a table with songs features USA ----
 
-features_usa <- vector(mode = 'list', length = 50)
+features_usa <- vector(mode = 'list', length = 50)  # creating a list which will contain songs' features
 
 for (i in 1:50) {
 features_usa[[i]] = GET(url = vec_id_usa[i],
                         config = add_headers(authorization = token))
-features_usa[[i]] = httr::content(features_usa[[i]])  # extracting the songs' features into vector
+features_usa[[i]] = httr::content(features_usa[[i]])  # extracting the songs' features into the list
 }
 
 songs_f_usa <- do.call('rbind', features_usa)  # creating a table with songs' features
@@ -129,20 +131,20 @@ for (i in 4:16) {
   usa[, i] <- unlist(usa[, i], use.names = F)
 }
 
-# Adding a song position on the chart ----
+# Adding a song position on the chart to the table ----
 usa <- add_column(usa, position = 1:50, .after = 1)
 ```
 
 ``` {r usatable, echo=F, warning=F, message=F}
 library(knitr)
-head(usa[2:10]) %>% kable()
+head(usa[2:10]) %>% kable(caption = 'Table 1. Top six songs in the USA (2022) and their main features')
 ```
 
 I have done the same with the Italian and Japanese playlists.
 
 ### 4.2. Features analysis
 
-First, I was interested in the descriptive analysis of the means of features for each country. I grouped the songs by countries and counted the means for their features:
+I was interested in the  analysis of the means of features for each country. I grouped the songs by countries and counted the means for their features:
 
 ```{r means, warning=F, message=F, echo=F}
 data <- rio::import('songs/data.csv')
@@ -153,12 +155,14 @@ names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renami
 ```
 
 ```{r datatable, echo=F}
-head(all_means[c(1, 2, 3, 5, 7, 8, 9)]) %>% kable()
+head(all_means[c(1, 2, 3, 5, 7, 8, 9)]) %>% kable(caption = "Table 2. Mean scores for songs' features grouped by countries")
 ```
 
-Having analyzed the means of the features, I have been able to make the following conclusions. The most popular songs of 2022 in all three countries score high on *danceability* (>0.6 on the scale from 0 to 1), *energy* (>0.63) and *loudness* (>-7 on the scale from -60 to 0 []). At the same time, the songs have low scores in *speechiness* (<0.12), *acousticness* (<0.23), *instrumentalness* (<0.02) and *liveness* (<0.22). It means that people from the USA, Japan and Italy like energetic songs that are easy to dance to. Also, the songs are not instrumental, they are recorded in the studio, and almost all the words in the songs are sung (not spoken).
+Having analyzed the means of the features, I have been able to obtain the following results.
 
-I have also paid attention to the differences in the means in particular features between the countries. For example, the *danceability* feature means are almost equal in the US and Italy (0.67790, 0.67388), but is different in Japan (0.60980). t-test (0.05) also proves it:
+The most popular songs of 2022 in all three countries score high on *danceability* (>0.6 on the scale from 0 to 1 []), *energy* (>0.63) and *loudness* (>-7 on the scale from -60 to 0 []). At the same time, the songs have low scores in *speechiness* (<0.12), *acousticness* (<0.23), *instrumentalness* (<0.02) and *liveness* (<0.22). It means that people from the USA, Japan and Italy like energetic songs that are easy to dance to. Also, the songs are not instrumental, they are recorded in the studio, and almost all the words in the songs are sung (not spoken).
+
+I have also paid attention to the differences in the means in particular features between the countries. For example, the *danceability* feature means are almost equal in the US and Italy (0.67790, 0.67388), but it is different in Japan (0.60980). t-test (0.05) demonstrates statistically significant difference between the *danceability* means in Italy and Japan:
 
 ```{r tdance, echo=F, warning=F, message=F}
 it_jpn <- filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
@@ -167,6 +171,7 @@ it_jpn.p <- round(it_jpn.p,4)
 
 t <- it_jpn$statistic
 df <- it_jpn$parameter
+df <- round(df)
 t <- round(t,3)
 df.t <- paste(t,df, sep = ", ")
 
@@ -174,7 +179,7 @@ it_jpn_rownames <- c('P value', 't and df')
 statoutput <- c(it_jpn.p, df.t)
 table_it_jpn <- data.frame(it_jpn_rownames,statoutput)
 
-names(table_it_jpn) <- c("t-test on Italy - Japan danceability","")
+names(table_it_jpn) <- c("Table 3. t-test on Italy - Japan danceability","")
 
 pander::pander(table_it_jpn,justify ="left")
 ```
@@ -183,14 +188,30 @@ It means that Japanese people prefer songs that are slightly less danceable than
 
 On the other hand, American people enjoy less energetic songs (0.63474) compared to people from Italy and Japan (0.73332, 0.74724):
 
-```{r energybox, echo=F}
-data %>% group_by(country) %>% ggplot(., aes(country, energy)) + geom_boxplot() + coord_flip() + theme_bw()
+```{r energybox, echo=F, message=F, warning=F}
+data$country_sort <- with(data, reorder(country, energy, function(x) median(x, na.rm = T)))
+ggplot(data, aes(country_sort, energy)) + 
+  geom_boxplot() + 
+  coord_flip() +
+  labs(y = 'energy', x ='country', title = "Plot 1. Boxplot for 'energy' scores for three countries") +
+  theme_bw()
 ```
 
-ANOVA analysis has also been performed on other variables to see if there are any statistically significant differences between the means of the three countries. The tests on *loudness*, *speechiness*, *valence* and *duration* of the songs returned the statistically significant p-values. For example, this is the ANOVA test that pays attention to the songs' *valence*:
+ANOVA analysis has also been performed on other variables to see if there are any statistically significant differences between the means of the three countries. The tests on *loudness*, *speechiness*, *valence* and *duration* of the songs returned the statistically significant p-values:
+
+```{r anova_all, warning=F, message=F, echo=F}
+anova_all <- data.frame(variable = c('loudness', 'speechiness', 'instrumentalness', 'liveness',
+                                     'valence', 'tempo', 'duration_min'),
+                        p = c('0.000', '0.008', '0.461', '0.052', '0.025', '0.614', '0.000'))
+names(anova_all) <- c("Table 4. ANOVA: p-values for songs' features")
+```
+
+For example, this is the ANOVA test that pays attention to the songs' *valence*:
 
 ```{r valenceaov, echo=F}
 summary(aov(valence ~ country, data))
 ```
 
-Although some tests returned statistically significant values, not all of them are practically significant. For instance, for ANOVA on `speechiness` p-level is less than 0.01. However, the `speechiness` values for Italy, Japan and the USA do not vary much: 0.09, 0.07 and 0.11 (on the scale from 0 to 1). Practical significance, as well as statistical one, has been found in `valence` and `duration` variables. Japanese people prefer happier songs (0.604) than Italians and Americans (0.509, 0.492). In addition, top songs in Japan are longer (~ 4 minutes) compared to the Italian and American ones (~ 3 and 3.5 minutes).
+Although some tests returned statistically significant values, not all of them are practically significant. For instance, for ANOVA on *speechiness* p-level is less than 0.01. However, the *speechiness* values for Italy, Japan and the USA do not vary much: 0.09, 0.07 and 0.11 accordingly (on the scale from 0 to 1). Still, practical significance, as well as the statistical one, has been found in *valence* and *duration* variables. Japanese people prefer happier songs (0.604) than Italians and Americans (0.509, 0.492). In addition, top songs in Japan are longer (~ 4 minutes) compared to the Italian and American ones (~ 3 and 3.5 minutes).
+
+## 5. Conclusion
