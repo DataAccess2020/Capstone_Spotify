@@ -2,6 +2,7 @@
 library(tidyverse)
 library(httr)
 library(stringr)
+library(cowplot)
 
 # Authorization
 spotify_cred <- readr::read_csv(file = "spotify-credentials.csv")
