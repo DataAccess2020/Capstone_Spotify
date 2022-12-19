@@ -1,7 +1,7 @@
 ---
 title: 'Analysis of Spotify Top 50 Songs of 2022: US, Italy, Japan'
 author: "Sergei Korotkikh"
-date: "18-12-2022"
+date: "19-12-2022"
 output:
   pdf_document:
     toc: yes
@@ -16,16 +16,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 1. Introduction
 
-This project is devoted to analyzing the features of Top-50 songs of year 2022 in the United States, Italy and Japan. Using the Spotify API, I obtained the data for the features for each song. I was interested to see if there are any features that make a song popular, and if such features are the same around the world.
+This project is devoted to analyzing the features of Spotify Top-50 songs of year 2022 in the United States, Italy and Japan. Using the Spotify API, I obtained the data for the features for each song. I was interested to see if there are any features that make a song popular, and if such features are the same around the world.
 
 ## 2. Literature
 Since it is my first research project that involves statistics, I searched for similar analyses to use one as a guideline. I found a research paper called *"What makes a song trend? Cluster analysis of musical attributes for Spotify top trending songs"* in which Top 100 US Trending Songs of 2017 and 2018 were analyzed. According to this article, the most trendy songs in the US scored high in danceability and energy. In addition, their means for liveness and instrumentalness were low [1, p.79-82].
 
-When choosing the countries for the analysis, I took into consideration the significance of music market in the country, the region in which the country is located, and the number of "authentic" songs on the playlist of top songs on Spotify. USA and Japan were the two biggest music markets in the world in 2021 [2, p.10], so I decided to choose them. Other countries (Germany, South Korea, China) either have many American songs or are located in the same region (North America or Asia). So, for my third country I have chosen Italy.
+When choosing the countries for the analysis, I took into consideration the significance of the country's music market in the world, the region in which the country is located, and the number of "authentic" songs on the playlist of top songs on Spotify. USA and Japan were the two biggest music markets in the world in 2021 [2, p.10], so I decided to choose them. Other countries (Germany, South Korea, China) either have many American songs or are located in the same region (North America or Asia). So, as my third country I have chosen Italy.
 
 ## 3. Hypotheses
 
-Since most people love 'happy' songs that they can easily dance to, I suppose that this year again the top songs should score high in danceability, energy and valence (the variable which shows how 'happy' the song is) [3]. Furthermore, I think that these features should not be different in the USA, Japan and Italy. In other words, there should not be any statistically significant difference between any features.
+Since most people love 'happy' songs that they can easily dance to, I suppose that this year again the top songs should score high in danceability, energy and valence (the variable which shows how 'happy' the song is [3]). Furthermore, I think that these features should not be different in the USA, Japan and Italy. In other words, there should not be any statistically significant difference between any features.
 
 Thus, my hypotheses are:
 
@@ -83,83 +83,85 @@ library(tidyverse)
 library(httr)
 library(stringr)
 library(cowplot)
+library(knitr)
+
 
 # Creating a table with USA song IDs ----
 
-songs_usa <- GET(url = url_usa,  # the link to the playlist
+# the link to the playlist
+songs_usa <- GET(url = url_usa,
                 config = add_headers(authorization = token))
 
-songs_usa <- httr::content(songs_usa)  # extracting the 'large list' to know the way to song ID
+# extracting the 'large list' to know the way to song ID
+songs_usa <- httr::content(songs_usa)
 
-song_id_usa <- vector(length = 50)  # creating a vector which will contain songs' IDs
+# creating a vector which will contain songs' IDs
+song_id_usa <- vector(length = 50)
 
+# loading the IDs into the vector
 for (i in 1:50) {
-  song_id_usa[[i]] = songs_usa$items[[i]]$track$id  # loading the IDs into the vector
+  song_id_usa[[i]] = songs_usa$items[[i]]$track$id  
 }
+
 
 # Creating a table with artist name and song title USA ----
 
-vec_id_usa <- vector(length = 50)  # creating a vector for the URL for each song
+# creating a vector for the URL for each song
+vec_id_usa <- vector(length = 50)
 
+# creating the URL for each song for API to use
 for (i in 1:50) {
-  vec_id_usa[i] <- str_c(track_url, song_id_usa[i])  # creating the URL for each song for API to use
+  vec_id_usa[i] <- str_c(track_url, song_id_usa[i])
 }
 
+# creating a table which will contain song ID, artist and title
 names_usa <- data.frame(id = character(),
                     artist = character(),
-                    title = character())  # creating a table which will contain song ID, artist and title
+                    title = character())
 
+# adding the values to the table
 for (i in 1:50) {
-  names_usa[nrow(names_usa) + 1, ] = c(song_id_usa[i], songs_usa$items[[i]]$track$artists[[1]]$name, songs_usa$items[[i]]$track$name)  # adding the values to the table
+  names_usa[nrow(names_usa) + 1, ] = c(song_id_usa[i], 
+         songs_usa$items[[i]]$track$artists[[1]]$name,
+         songs_usa$items[[i]]$track$name)  
 }
+
 
 # Creating a table with songs features USA ----
 
-features_usa <- vector(mode = 'list', length = 50)  # creating a list which will contain songs' features
+# creating a list which will contain songs' features
+features_usa <- vector(mode = 'list', length = 50)
 
+# extracting the songs' features into the list
 for (i in 1:50) {
 features_usa[[i]] = GET(url = vec_id_usa[i],
                         config = add_headers(authorization = token))
-features_usa[[i]] = httr::content(features_usa[[i]])  # extracting the songs' features into the list
+features_usa[[i]] = httr::content(features_usa[[i]])
 }
 
-songs_f_usa <- do.call('rbind', features_usa)  # creating a table with songs' features
-songs_f_usa <- songs_f_usa[, -c(12:16)]  # deleting the unnecessary features
-usa <- cbind(names_usa, songs_f_usa)  # creating the table with ID, artist, title and features
+# creating a table with songs' features;
+# deleting the unnecessary features;
+# creating the table with ID, artist, title and features
+songs_f_usa <- do.call('rbind', features_usa)
+songs_f_usa <- songs_f_usa[, -c(12:16)]
+usa <- cbind(names_usa, songs_f_usa)
+
 
 # Changing tables' values from lists to vectors ----
 for (i in 4:16) {
   usa[, i] <- unlist(usa[, i], use.names = F)
 }
 
+
 # Adding a song position on the chart to the table ----
 usa <- add_column(usa, position = 1:50, .after = 1)
-```
-
-``` {r usatable, echo=F, warning=F, message=F}
-library(knitr)
-head(usa[2:10]) %>% kable(caption = 'Table 1. Top six songs in the USA (2022) and their main features')
 ```
 
 I have done the same with the Italian and Japanese playlists.
 
 ## 5. Analysis and visualization
 
-I was interested in the  analysis of the means of features for each country. I grouped the songs by countries and counted the means for their features:
-
-```{r means, warning=F, message=F, echo=F}
-data <- rio::import('songs/data.csv')
-all_means <- data %>% group_by(country) %>% summarise_if(is.numeric, mean)
-all_means$position <- NULL  # we do not need the mean for the position
-all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to seconds
-names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renaming the column
-all_means_main <- all_means %>% select(country, danceability, energy, loudness, speechiness, acousticness,
-                                       instrumentalness, liveness, valence, tempo)
-```
-
-```{r datatable, echo=F}
-head(all_means[c(1, 2, 3, 5, 7, 8, 9)]) %>% kable(caption = "Table 2. Mean scores for songs' features grouped by countries")
-```
+I was interested in the analysis of the means of features for each country. I grouped the songs by countries and counted the means for their features.
 
 Having analyzed the means of the features, I have been able to obtain the following results.
 
@@ -168,6 +170,7 @@ The most popular songs of 2022 in all three countries score high on *danceabilit
 I have also paid attention to the differences in the means in particular features between the countries. For example, the *danceability* feature means are almost equal in the US and Italy (0.67790, 0.67388), but it is different in Japan (0.60980). t-test (0.05) demonstrates statistically significant difference between the *danceability* means in Italy and Japan:
 
 ```{r tdance, echo=F, warning=F, message=F}
+data <- rio::import('songs/data.csv')
 it_jpn <- filter(data, country %in% c('IT', 'JPN')) %>% t.test(danceability ~ country, .)
 it_jpn.p <- it_jpn$p.value
 it_jpn.p <- round(it_jpn.p,4)
@@ -181,10 +184,9 @@ df.t <- paste(t,df, sep = ", ")
 it_jpn_rownames <- c('P value', 't and df')
 statoutput <- c(it_jpn.p, df.t)
 table_it_jpn <- data.frame(it_jpn_rownames,statoutput)
+names(table_it_jpn) <- c('', '')
 
-names(table_it_jpn) <- c("Table 3. t-test on Italy - Japan danceability","")
-
-pander::pander(table_it_jpn,justify ="left")
+table_it_jpn %>% kable(caption = "t-test on Italy - Japan danceability")
 ```
 
 It means that Japanese people prefer songs that are slightly less danceable than Italians and Americans.
@@ -197,16 +199,16 @@ ggplot(data, aes(country_sort, energy)) +
   geom_boxplot() + 
   coord_flip() +
   labs(y = 'energy', x ='country', title = "Plot 1. Boxplot for 'energy' scores for three countries") +
-  theme_bw()
+  theme_cowplot()
 ```
 
-ANOVA analysis has also been performed on other variables to see if there are any statistically significant differences between the means of the three countries. The tests on *loudness*, *speechiness*, *valence* and *duration* of the songs returned the statistically significant p-values:
+ANOVA analysis has also been performed on other variables to see if there are any statistically significant differences between the means of the three countries. The tests on *loudness*, *speechiness*, *valence* and *duration* of the songs returned the statistically significant p-values.
 
 ```{r anova_all, warning=F, message=F, echo=F}
 anova_all <- data.frame(variable = c('loudness', 'speechiness', 'instrumentalness', 'liveness',
                                      'valence', 'tempo', 'duration_min'),
                         p = c('0.000', '0.008', '0.461', '0.052', '0.025', '0.614', '0.000'))
-names(anova_all) <- c("Table 4. ANOVA: p-values for songs' features")
+anova_all %>% kable(caption = "ANOVA: p-values for songs' features")
 ```
 
 For example, this is the ANOVA test that pays attention to the songs' *valence*:
@@ -217,22 +219,36 @@ summary(aov(valence ~ country, data))
 
 Although some tests returned statistically significant values, not all of them are practically significant. For instance, for ANOVA on *speechiness* p-level is less than 0.01. However, the *speechiness* values for Italy, Japan and the USA do not vary much: 0.09, 0.07 and 0.11 accordingly (on the scale from 0 to 1). Still, practical significance, as well as the statistical one, has been found in *valence* and *duration* variables. Japanese people prefer happier songs (0.604) than Italians and Americans (0.509, 0.492). In addition, top songs in Japan are longer (~ 4 minutes) compared to the Italian and American ones (~ 3 and 3.5 minutes).
 
-Then, I decided to create a plot which would show the differences in all nine features across the countries. I was thinking of using the `facet_wrap` function of `ggplot2` package. I needed to create a table which would have the country, as the first column, the mean score for a specific variable as the second one, and the variable for this mean score as the third one. It took me some time to work on the code, but in the end I managed to develop one:
+Then, I decided to create a plot which would show the differences in all nine features across the countries. I was thinking of using the `facet_wrap` function of `ggplot2` package. I needed to create a table which would have the country as the first column, the mean score for a specific variable as the second one, and the variable for this mean score as the third one. It took me some time to work on the code, but in the end I managed to develop one:
 
-```{r table_plot2, warning=F, message=F,}
-means_first <- cbind(all_means_main[1:3, 1],  # creating the table with the column 'country',
-                     all_means_main[1:3, 2],  # 'mean'
-                     names(all_means_main[2])) # and 'variable', and inserting the first value in there
-names(means_first)[1] <- 'country'  # setting the names of the columns
+```{r all_means_main, echo=F, warning=F, message=F}
+all_means <- data %>% group_by(country) %>% summarise_if(is.numeric, mean)
+all_means$position <- NULL  # we do not need the mean for the position
+all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to minutes
+names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renaming the column
+all_means_main <- all_means %>% select(country, danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo)
+```
+
+```{r table_plot2, warning=F, message=F}
+means_first <- cbind(all_means_main[1:3, 1],   # creating the table with 
+                                               # the column 'country',
+                     all_means_main[1:3, 2],   # 'mean'
+                     names(all_means_main[2])) # and 'variable', and 
+                                               # inserting the first value in there
+# setting the names of the columns
+names(means_first)[1] <- 'country'
 names(means_first)[2] <- 'mean'
 names(means_first)[3] <- 'variable'
 
-for (i in 3:10) {  # inserting the values of other variables
+# inserting the values of other variables
+for (i in 3:10) {
   means <- cbind(all_means_main[1:3, 1], all_means_main[1:3, i], names(all_means_main[i]))
   names(means)[1] <- 'country'
   names(means)[2] <- 'mean'
   names(means)[3] <- 'variable'
-  means_first <- rbind(means_first, means)  # joining the first table and the table with a particular variable
+  means_first <- rbind(means_first, means)  # joining the first table 
+                                            # and the table with a particular 
+                                            # variable
 }
 ```
 
