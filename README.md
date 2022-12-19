@@ -28,6 +28,6 @@ There are some differences in features' scores across the countries as well. For
 3. Spotify Web API | Spotify for Developers. Get Track's Audio Features. URL: https://developer.spotify.com/documentation/web-api/reference/#/operations/get-audio-features
 
 ## Folders
-- `scripts`: R scripts containing the code for data transformation, analysis and visualization;
 - `figures`: plots used in the final report
 - `output`: final report
+- `scripts`: R scripts containing the code for data transformation, analysis and visualization
