@@ -1,9 +1,9 @@
 # Downloading playlists ----
-playlist_usa <- 'https://open.spotify.com/playlist/37i9dQZF1DXbJMiQ53rTyJ' %>%
+playlist_usa <- 'https://open.spotify.com/playlist/XXXXXXXXXXXXXXXXXXXX' %>%
   str_remove(., 'https://open.spotify.com/playlist/')
-playlist_japan <- 'https://open.spotify.com/playlist/37i9dQZF1DWYYQb2mqFd5I' %>%
+playlist_japan <- 'https://open.spotify.com/playlist/XXXXXXXXXXXXXXXXXXXX' %>%
   str_remove(., 'https://open.spotify.com/playlist/')
-playlist_italy <- 'https://open.spotify.com/playlist/37i9dQZF1DWUJcZpQ1337Z' %>%
+playlist_italy <- 'https://open.spotify.com/playlist/XXXXXXXXXXXXXXXXXXXX' %>%
   str_remove(., 'https://open.spotify.com/playlist/')
 url_usa <- str_c('https://api.spotify.com/v1/playlists/', playlist_usa, '/tracks')
 url_japan <- str_c('https://api.spotify.com/v1/playlists/', playlist_japan, '/tracks')

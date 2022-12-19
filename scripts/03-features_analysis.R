@@ -19,7 +19,7 @@ data <- rbind(usa_mod, it_mod, jpn_mod)
 # Counting means for the features
 all_means <- data %>% group_by(country) %>% summarise_if(is.numeric, mean)
 all_means$position <- NULL  # we do not need the mean for the position
-all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to seconds
+all_means$duration_ms <- apply(all_means[, 'duration_ms'], 1, function(x) (x/60000))  # turning ms to minutes
 names(all_means)[names(all_means) == 'duration_ms'] <- 'duration_mins'  # renaming the column
 
 # Leaving only relevant columns ----
@@ -43,6 +43,7 @@ df.t <- paste(t,df, sep = ", ")
 it_jpn_rownames <- c('P value', 't and df')
 statoutput <- c(it_jpn.p, df.t)
 table_it_jpn <- data.frame(it_jpn_rownames,statoutput)
+names(table_it_jpn) <- c('', '')
 
 names(table_it_jpn) <- c("Table 3. t-test on Italy - Japan danceability","")
 
@@ -59,4 +60,3 @@ summary(aov(duration_ms ~ country, data))  # significant
 anova_all <- data.frame(variable = c('loudness', 'speechiness', 'instrumentalness', 'liveness',
                                      'valence', 'tempo', 'duration_min'),
                         p = c('0.000', '0.008', '0.461', '0.052', '0.025', '0.614', '0.000'))
-names(anova_all) <- c("Table 4. ANOVA: p-values for songs' features")

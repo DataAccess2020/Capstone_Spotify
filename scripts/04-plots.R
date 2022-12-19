@@ -4,7 +4,7 @@ box_energy <- ggplot(data, aes(country_sort, energy)) +
   geom_boxplot() + 
   coord_flip() +
   labs(y = 'energy', x ='country', title = "Plot 1. Boxplot for 'energy' scores for three countries") +
-  theme_bw()
+  theme_cowplot()
 
 # Creating the table for ggplot facet_wrap ----
 means_first <- cbind(all_means_main[1:3, 1], all_means_main[1:3, 2], names(all_means_main[2]))
