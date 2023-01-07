@@ -3,16 +3,25 @@ title: 'Analysis of Spotify Top 50 Songs of 2022: US, Italy, Japan'
 author: "Sergei Korotkikh"
 date: "19-12-2022"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     toc: yes
     highlight: pygments
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+
+Link to the repository: https://github.com/DataAccess2020/Capstone_Spotify
+
+Number of commits: 43
+
+Number of pull requests: 1
+
+Number of issues: 3
 
 ## 1. Introduction
 
